@@ -1,0 +1,20 @@
+server:
+  name: go-firestore-rest-api
+  port: 8080
+
+log:
+  level: info
+  map:
+    time: "@timestamp"
+    msg: message
+
+middleware:
+  log: true
+  skips: /health
+  request: request
+  response: response
+  size: size
+
+firestore:
+  file: configs/key.json
+  project_id: go-firestore-rest-api
