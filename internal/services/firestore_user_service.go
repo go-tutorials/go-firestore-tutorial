@@ -5,8 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/mitchellh/mapstructure"
-	. "go-service/internal/models"
 	"google.golang.org/api/iterator"
+
+	. "go-service/internal/models"
 )
 
 type FirestoreUserService struct {

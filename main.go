@@ -35,10 +35,11 @@ func main() {
 	if er2 != nil {
 		panic(er2)
 	}
+
 	fmt.Println("Start server")
 	server := ""
 	if conf.Server.Port > 0 {
-		server = ":" + strconv.Itoa(conf.Server.Port)
+		server = ":" + strconv.FormatInt(conf.Server.Port, 10)
 	}
 	if er3 := http.ListenAndServe(server, r); er3 != nil {
 		fmt.Println(er3.Error())

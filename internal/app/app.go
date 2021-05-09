@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	firebase "firebase.google.com/go"
+	"firebase.google.com/go"
 	"github.com/core-go/health"
 	"github.com/core-go/health/firestore"
 	"google.golang.org/api/option"
@@ -17,8 +17,8 @@ type ApplicationContext struct {
 }
 
 func NewApp(ctx context.Context, root Root) (*ApplicationContext, error) {
-	sa := option.WithCredentialsFile(root.Firestore.File)
-	app, er1 := firebase.NewApp(ctx, nil, sa)
+	opts := option.WithCredentialsJSON([]byte(root.Credentials))
+	app, er1 := firebase.NewApp(ctx, nil, opts)
 	if er1 != nil {
 		return nil, er1
 	}
@@ -31,7 +31,7 @@ func NewApp(ctx context.Context, root Root) (*ApplicationContext, error) {
 	userService := services.NewUserService(client)
 	userHandler := handlers.NewUserHandler(userService)
 
-	firestoreChecker := firestore.NewHealthChecker(root.Firestore.ProjectId)
+	firestoreChecker := firestore.NewHealthChecker(ctx, []byte(root.Credentials))
 	healthHandler := health.NewHealthHandler(firestoreChecker)
 
 	return &ApplicationContext{

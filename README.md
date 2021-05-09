@@ -191,24 +191,22 @@ To check if the service is available, refer to [core-go/health](https://github.c
 ```
 To create health checker, and health handler
 ```go
-    ctx := context.Background()
-    sa := option.WithCredentialsFile(root.Firestore.File)
-    app, er1 := firebase.NewApp(ctx, nil, sa)
-    if er1 != nil {
-        return nil, er1
-    }
-    
-    client, er2 := app.Firestore(ctx)
-    if er2 != nil {
-        return nil, er2
-    }
-    
-    userService := services.NewUserService(client)
-    userHandler := handlers.NewUserHandler(userService)
-    
-    firestoreChecker := firestore.NewHealthChecker(root.Firestore.ProjectId)
-    checkers := []health.HealthChecker{firestoreChecker}
-    healthHandler := health.NewHealthHandler(checkers)
+	opts := option.WithCredentialsJSON([]byte(root.Credentials))
+	app, er1 := firebase.NewApp(ctx, nil, opts)
+	if er1 != nil {
+		return nil, er1
+	}
+
+	client, er2 := app.Firestore(ctx)
+	if er2 != nil {
+		return nil, er2
+	}
+
+	userService := services.NewUserService(client)
+	userHandler := handlers.NewUserHandler(userService)
+
+	firestoreChecker := firestore.NewHealthChecker(ctx, []byte(root.Credentials))
+	healthHandler := health.NewHealthHandler(firestoreChecker)
 ```
 
 To handler routing
@@ -228,20 +226,15 @@ import (
 )
 
 type Root struct {
-	Server     ServerConfig    `mapstructure:"server"`
-	Log        log.Config      `mapstructure:"log"`
-	MiddleWare mid.LogConfig   `mapstructure:"middleware"`
-	Firestore  FirestoreConfig `mapstructure:"firestore"`
+	Server      ServerConfig  `mapstructure:"server"`
+	Log         log.Config    `mapstructure:"log"`
+	MiddleWare  mid.LogConfig `mapstructure:"middleware"`
+	Credentials string        `mapstructure:"credentials"`
 }
 
 type ServerConfig struct {
 	Name string `mapstructure:"name"`
-	Port int    `mapstructure:"port"`
-}
-
-type FirestoreConfig struct {
-	File      string `mapstructure:"file"`
-	ProjectId string `mapstructure:"project_id"`
+	Port int64  `mapstructure:"port"`
 }
 ```
 
