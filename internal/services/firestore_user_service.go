@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	"encoding/json"
+	fs "github.com/core-go/firestore"
 	"github.com/mitchellh/mapstructure"
 	"google.golang.org/api/iterator"
 
@@ -12,14 +13,16 @@ import (
 
 type FirestoreUserService struct {
 	Client *firestore.Client
+	Collection *firestore.CollectionRef
 }
 
 func NewUserService(client *firestore.Client) *FirestoreUserService {
-	return &FirestoreUserService{Client: client}
+	collection := client.Collection("users")
+	return &FirestoreUserService{Collection: collection, Client: client}
 }
 
 func (s *FirestoreUserService) GetAll(ctx context.Context) (*[]User, error) {
-	iter := s.Client.Collection("users").Documents(ctx)
+	iter := s.Collection.Documents(ctx)
 	var result []User
 	for {
 		doc, er1 := iter.Next()
@@ -43,7 +46,7 @@ func (s *FirestoreUserService) GetAll(ctx context.Context) (*[]User, error) {
 }
 
 func (s *FirestoreUserService) Load(ctx context.Context, id string) (*User, error) {
-	dsnap, er1 := s.Client.Collection("users").Doc(id).Get(ctx)
+	dsnap, er1 := s.Collection.Doc(id).Get(ctx)
 	var user *User
 	if er1 != nil {
 		return nil, er1
@@ -56,7 +59,7 @@ func (s *FirestoreUserService) Load(ctx context.Context, id string) (*User, erro
 }
 
 func (s *FirestoreUserService) Insert(ctx context.Context, user *User) (int64, error) {
-	_, err := s.Client.Collection("users").Doc(user.Id).Set(ctx, user)
+	_, err := s.Collection.Doc(user.Id).Set(ctx, user)
 	if err != nil {
 		return -1, err
 	}
@@ -64,7 +67,7 @@ func (s *FirestoreUserService) Insert(ctx context.Context, user *User) (int64, e
 }
 
 func (s *FirestoreUserService) Update(ctx context.Context, user *User) (int64, error) {
-	_, err := s.Client.Collection("users").Doc(user.Id).Set(ctx, user)
+	_, err := s.Collection.Doc(user.Id).Set(ctx, user)
 	if err != nil {
 		return -1, err
 	}
@@ -74,25 +77,9 @@ func (s *FirestoreUserService) Update(ctx context.Context, user *User) (int64, e
 func (s *FirestoreUserService) Patch(ctx context.Context, user map[string]interface{}) (int64, error) {
 	//get element by id
 	id := user["id"]
-	sid := id.(string)
-	dsnap, err1 := s.Client.Collection("users").Doc(sid).Get(ctx)
-	if err1 != nil {
-		return -1, err1
-	}
+	delete(user, "id")
 
-	dest := make(map[string]interface{})
-	for k, v := range dsnap.Data() {
-		dest[k] = v
-	}
-
-	for k, v := range user {
-		dest[k] = v
-	}
-	_, err := s.Client.Collection("users").Doc(sid).Set(ctx, dest)
-	if err != nil {
-		return -1, err
-	}
-	return 1, nil
+	return fs.PatchOne(ctx, s.Collection, user, id.(string), s.Client)
 }
 
 func (s *FirestoreUserService) Delete(ctx context.Context, id string) (int64, error) {
