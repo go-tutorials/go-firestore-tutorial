@@ -82,14 +82,15 @@ func (s *FirestoreUserService) Patch(ctx context.Context, json map[string]interf
 
 	uid := json["id"]
 	id := uid.(string)
-	doc, err1 := s.Collection.Doc(id).Get(ctx)
+	docRef := s.Collection.Doc(id)
+	doc, err1 := docRef.Get(ctx)
 	if err1 != nil {
 		return -1, err1
 	}
 	delete(json, "id")
 
 	dest := MapToFirestore(json, doc, maps)
-	_, err := s.Collection.Doc(id).Set(ctx, dest)
+	_, err := docRef.Set(ctx, dest)
 	if err != nil {
 		return -1, err
 	}
