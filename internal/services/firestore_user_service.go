@@ -4,6 +4,8 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	"google.golang.org/api/iterator"
+	"reflect"
+	"strings"
 
 	. "go-service/internal/models"
 )
@@ -36,6 +38,8 @@ func (s *FirestoreUserService) GetAll(ctx context.Context) (*[]User, error) {
 		}
 
 		user.Id = doc.Ref.ID
+		user.CreateTime = &doc.CreateTime
+		user.UpdateTime = &doc.UpdateTime
 		users = append(users, user)
 	}
 	return &users, nil
@@ -50,6 +54,8 @@ func (s *FirestoreUserService) Load(ctx context.Context, id string) (*User, erro
 	er2 := doc.DataTo(&user)
 	if er2 == nil {
 		user.Id = id
+		user.CreateTime = &doc.CreateTime
+		user.UpdateTime = &doc.UpdateTime
 	}
 	return &user, er2
 }
@@ -70,24 +76,20 @@ func (s *FirestoreUserService) Update(ctx context.Context, user *User) (int64, e
 	return 1, nil
 }
 
-func (s *FirestoreUserService) Patch(ctx context.Context, user map[string]interface{}) (int64, error) {
-	id := user["id"]
-	sid := id.(string)
-	data, err1 := s.Collection.Doc(sid).Get(ctx)
+func (s *FirestoreUserService) Patch(ctx context.Context, json map[string]interface{}) (int64, error) {
+	userType := reflect.TypeOf(User{})
+	maps := MakeFirestoreMap(userType)
+
+	uid := json["id"]
+	id := uid.(string)
+	doc, err1 := s.Collection.Doc(id).Get(ctx)
 	if err1 != nil {
 		return -1, err1
 	}
-	delete(user, "id")
+	delete(json, "id")
 
-	dest := make(map[string]interface{})
-	for k, v := range data.Data() {
-		dest[k] = v
-	}
-
-	for k, v := range user {
-		dest[k] = v
-	}
-	_, err := s.Collection.Doc(sid).Set(ctx, dest)
+	dest := MapToFirestore(json, doc, maps)
+	_, err := s.Collection.Doc(id).Set(ctx, dest)
 	if err != nil {
 		return -1, err
 	}
@@ -100,4 +102,53 @@ func (s *FirestoreUserService) Delete(ctx context.Context, id string) (int64, er
 		return -1, err
 	}
 	return 1, nil
+}
+
+func MakeFirestoreMap(modelType reflect.Type) map[string]string {
+	maps := make(map[string]string)
+	numField := modelType.NumField()
+	for i := 0; i < numField; i++ {
+		field := modelType.Field(i)
+		key1 := field.Name
+		if tag0, ok0 := field.Tag.Lookup("json"); ok0 {
+			if strings.Contains(tag0, ",") {
+				a := strings.Split(tag0, ",")
+				key1 = a[0]
+			} else {
+				key1 = tag0
+			}
+		}
+		if tag, ok := field.Tag.Lookup("firestore"); ok {
+			if tag != "-" {
+				if strings.Contains(tag, ",") {
+					a := strings.Split(tag, ",")
+					if key1 == "-" {
+						key1 = a[0]
+					}
+					maps[key1] = a[0]
+				} else {
+					if key1 == "-" {
+						key1 = tag
+					}
+					maps[key1] = tag
+				}
+			}
+		} else {
+			if key1 == "-" {
+				key1 = field.Name
+			}
+			maps[key1] = key1
+		}
+	}
+	return maps
+}
+func MapToFirestore(json map[string]interface{}, doc *firestore.DocumentSnapshot, maps map[string]string) map[string]interface{} {
+	fs := doc.Data()
+	for k, v := range json {
+		fk, ok := maps[k]
+		if ok {
+			fs[fk] = v
+		}
+	}
+	return fs
 }
