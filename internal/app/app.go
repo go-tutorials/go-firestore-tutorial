@@ -12,7 +12,7 @@ import (
 )
 
 type ApplicationContext struct {
-	HealthHandler *health.HealthHandler
+	HealthHandler *health.Handler
 	UserHandler   *handlers.UserHandler
 }
 
@@ -32,7 +32,7 @@ func NewApp(ctx context.Context, root Root) (*ApplicationContext, error) {
 	userHandler := handlers.NewUserHandler(userService)
 
 	firestoreChecker := firestore.NewHealthChecker(ctx, []byte(root.Credentials))
-	healthHandler := health.NewHealthHandler(firestoreChecker)
+	healthHandler := health.NewHandler(firestoreChecker)
 
 	return &ApplicationContext{
 		HealthHandler: healthHandler,

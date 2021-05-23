@@ -11,13 +11,12 @@ import (
 )
 
 type FirestoreUserService struct {
-	Client *firestore.Client
 	Collection *firestore.CollectionRef
 }
 
 func NewUserService(client *firestore.Client) *FirestoreUserService {
 	collection := client.Collection("users")
-	return &FirestoreUserService{Collection: collection, Client: client}
+	return &FirestoreUserService{Collection: collection}
 }
 
 func (s *FirestoreUserService) GetAll(ctx context.Context) (*[]User, error) {
@@ -98,7 +97,7 @@ func (s *FirestoreUserService) Patch(ctx context.Context, json map[string]interf
 }
 
 func (s *FirestoreUserService) Delete(ctx context.Context, id string) (int64, error) {
-	_, err := s.Client.Collection("users").Doc(id).Delete(ctx)
+	_, err := s.Collection.Doc(id).Delete(ctx)
 	if err != nil {
 		return -1, err
 	}
