@@ -16,24 +16,24 @@ import (
 
 func main() {
 	var conf app.Root
-	er1 := config.Load(&conf, "configs/config")
-	if er1 != nil {
-		panic(er1)
+	err := config.Load(&conf, "configs/config")
+	if err != nil {
+		panic(err)
 	}
 
 	r := mux.NewRouter()
 
 	log.Initialize(conf.Log)
 	r.Use(mid.BuildContext)
-	logger := mid.NewStructuredLogger()
+	logger := mid.NewLogger()
 	if log.IsInfoEnable() {
 		r.Use(mid.Logger(conf.MiddleWare, log.InfoFields, logger))
 	}
 	r.Use(mid.Recover(log.ErrorMsg))
 
-	er2 := app.Route(r, context.Background(), conf)
-	if er2 != nil {
-		panic(er2)
+	err = app.Route(r, context.Background(), conf)
+	if err != nil {
+		panic(err)
 	}
 
 	fmt.Println("Start server")
@@ -41,7 +41,7 @@ func main() {
 	if conf.Server.Port > 0 {
 		server = ":" + strconv.FormatInt(conf.Server.Port, 10)
 	}
-	if er3 := http.ListenAndServe(server, r); er3 != nil {
-		fmt.Println(er3.Error())
+	if err = http.ListenAndServe(server, r); err != nil {
+		fmt.Println(err.Error())
 	}
 }

@@ -1,10 +1,10 @@
-# go-firestore-rest-api
+# go-firestore-tutorial
 
 ## How to run
 #### Clone the repository
 ```shell
-git clone https://github.com/go-tutorials/go-firestore-rest-api.git
-cd go-firestore-rest-api
+git clone https://github.com/go-tutorials/go-firestore-tutorial
+cd go-firestore-tutorial
 ```
 
 #### To run the application
@@ -140,9 +140,9 @@ We must solve 2 problems:
 2. At service layer or repository layer, from json format, we must convert the json format to database format (in this case, we must convert to bson of Mongo)
 
 #### Solutions for patch  
-1. At http handler layer, we use [core-go/service](https://github.com/core-go/service), to convert the user struct to map, to make sure we just update the fields we need to update
+1. At http handler layer, we use [core-go/core](https://github.com/core-go/core), to convert the user struct to map, to make sure we just update the fields we need to update
 ```go
-import server "github.com/core-go/service"
+import server "github.com/core-go/core"
 
 func (h *UserHandler) Patch(w http.ResponseWriter, r *http.Request) {
     var user User
