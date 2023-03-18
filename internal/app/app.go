@@ -7,13 +7,13 @@ import (
 	"github.com/core-go/health/firestore"
 	"google.golang.org/api/option"
 
-	"go-service/internal/handlers"
-	"go-service/internal/services"
+	"go-service/internal/handler"
+	"go-service/internal/service"
 )
 
 type ApplicationContext struct {
 	HealthHandler *health.Handler
-	UserHandler   *handlers.UserHandler
+	UserHandler   *handler.UserHandler
 }
 
 func NewApp(ctx context.Context, root Root) (*ApplicationContext, error) {
@@ -28,8 +28,8 @@ func NewApp(ctx context.Context, root Root) (*ApplicationContext, error) {
 		return nil, er2
 	}
 
-	userService := services.NewUserService(client)
-	userHandler := handlers.NewUserHandler(userService)
+	userService := service.NewUserService(client)
+	userHandler := handler.NewUserHandler(userService)
 
 	firestoreChecker := firestore.NewHealthChecker(ctx, []byte(root.Credentials))
 	healthHandler := health.NewHandler(firestoreChecker)

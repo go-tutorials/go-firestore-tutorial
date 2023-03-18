@@ -1,4 +1,4 @@
-package services
+package service
 
 import (
 	"cloud.google.com/go/firestore"
@@ -7,7 +7,7 @@ import (
 	"google.golang.org/api/iterator"
 	"reflect"
 
-	. "go-service/internal/models"
+	. "go-service/internal/model"
 )
 
 type FirestoreUserService struct {

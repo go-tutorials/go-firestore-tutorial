@@ -1,4 +1,4 @@
-package handlers
+package handler
 
 import (
 	"encoding/json"
@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"reflect"
 
-	. "go-service/internal/models"
-	. "go-service/internal/services"
+	. "go-service/internal/model"
+	. "go-service/internal/service"
 )
 
 type UserHandler struct {
