@@ -19,8 +19,8 @@ func NewUserHandler(service UserService) *UserHandler {
 	return &UserHandler{service: service}
 }
 
-func (h *UserHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	res, err := h.service.GetAll(r.Context())
+func (h *UserHandler) All(w http.ResponseWriter, r *http.Request) {
+	res, err := h.service.All(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

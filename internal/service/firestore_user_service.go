@@ -19,7 +19,7 @@ func NewUserService(client *firestore.Client) *FirestoreUserService {
 	return &FirestoreUserService{Collection: collection}
 }
 
-func (s *FirestoreUserService) GetAll(ctx context.Context) (*[]User, error) {
+func (s *FirestoreUserService) All(ctx context.Context) (*[]User, error) {
 	iter := s.Collection.Documents(ctx)
 	var users []User
 	for {
