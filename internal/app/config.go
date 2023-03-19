@@ -5,7 +5,7 @@ import (
 	mid "github.com/core-go/log/middleware"
 )
 
-type Root struct {
+type Config struct {
 	Server      ServerConfig  `mapstructure:"server"`
 	Log         log.Config    `mapstructure:"log"`
 	MiddleWare  mid.LogConfig `mapstructure:"middleware"`

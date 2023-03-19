@@ -12,30 +12,30 @@ import (
 )
 
 type ApplicationContext struct {
-	HealthHandler *health.Handler
-	UserHandler   *handler.UserHandler
+	Health *health.Handler
+	User   *handler.UserHandler
 }
 
-func NewApp(ctx context.Context, root Root) (*ApplicationContext, error) {
-	opts := option.WithCredentialsJSON([]byte(root.Credentials))
-	app, er1 := firebase.NewApp(ctx, nil, opts)
-	if er1 != nil {
-		return nil, er1
+func NewApp(ctx context.Context, cfg Config) (*ApplicationContext, error) {
+	opts := option.WithCredentialsJSON([]byte(cfg.Credentials))
+	app, err := firebase.NewApp(ctx, nil, opts)
+	if err != nil {
+		return nil, err
 	}
 
-	client, er2 := app.Firestore(ctx)
-	if er2 != nil {
-		return nil, er2
+	client, err := app.Firestore(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	userService := service.NewUserService(client)
 	userHandler := handler.NewUserHandler(userService)
 
-	firestoreChecker := firestore.NewHealthChecker(ctx, []byte(root.Credentials))
+	firestoreChecker := firestore.NewHealthChecker(ctx, []byte(cfg.Credentials))
 	healthHandler := health.NewHandler(firestoreChecker)
 
 	return &ApplicationContext{
-		HealthHandler: healthHandler,
-		UserHandler:   userHandler,
+		Health: healthHandler,
+		User:   userHandler,
 	}, nil
 }
