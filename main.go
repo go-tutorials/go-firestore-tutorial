@@ -31,7 +31,7 @@ func main() {
 	}
 	r.Use(mid.Recover(log.ErrorMsg))
 
-	err = app.Route(r, context.Background(), cfg)
+	err = app.Route(context.Background(), r, cfg)
 	if err != nil {
 		panic(err)
 	}

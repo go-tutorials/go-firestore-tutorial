@@ -13,7 +13,7 @@ const (
 	DELETE = "DELETE"
 )
 
-func Route(r *mux.Router, ctx context.Context, cfg Config) error {
+func Route(ctx context.Context, r *mux.Router, cfg Config) error {
 	app, err := NewApp(ctx, cfg)
 	if err != nil {
 		return err
